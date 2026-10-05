@@ -254,6 +254,69 @@
   .chart svg { display:block; overflow:visible; }
   .chart text { font-family:var(--font); font-size:11px; fill:var(--muted); }
 
+  /* calendario */
+  .cal-card { padding:22px 24px; display:grid; grid-template-columns:minmax(0,1fr); gap:20px; }
+  @media (min-width:940px) { .cal-card { grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); } }
+  .cal-head { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .cal-head h3 { margin:0; font-size:17px; font-weight:600; letter-spacing:-.01em; }
+  .cal-sum { display:flex; gap:6px; flex-wrap:wrap; }
+  .cal-legend { display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-top:12px; }
+  .cal-legend span { display:inline-flex; align-items:center; gap:6px; }
+  .wk, .cal { display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:6px; }
+  .wk span { font-size:11px; color:var(--muted); text-align:center; padding-bottom:4px; letter-spacing:.04em; }
+  .day {
+    position:relative; min-height:86px; border-radius:16px; padding:8px 8px 6px; display:flex; flex-direction:column; gap:4px;
+    background:color-mix(in srgb, var(--ink) 4%, transparent); border:1px solid transparent; min-width:0; overflow:hidden; isolation:isolate;
+  }
+  .day.empty { background:none; }
+  .day .n { font-size:13px; font-weight:500; color:var(--ink-2); }
+  .day.past::before {
+    content:""; position:absolute; inset:0; z-index:-1; opacity:.55;
+    background:repeating-linear-gradient(-45deg, color-mix(in srgb, var(--ink) 5%, transparent) 0 5px, transparent 5px 10px);
+  }
+  .day.past .n { color:var(--muted); }
+  .day.today { border-color:var(--ink); background:var(--glass); }
+  .day.today .n { display:inline-grid; place-items:center; width:24px; height:24px; border-radius:50%; background:var(--lime); color:var(--lime-ink); font-weight:700; }
+  .day.today::after { content:""; position:absolute; inset:-1px; border-radius:16px; border:2px solid var(--lime); animation:ring 2.4s ease-out infinite; pointer-events:none; }
+  .ev { display:flex; align-items:center; gap:5px; font-size:11px; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  .ev i { width:7px; height:7px; border-radius:50%; flex:none; background:var(--ink); }
+  .ev.deuda i { background:var(--crit); }
+  .ev.cobro i { background:var(--lime); box-shadow:0 0 0 1.5px var(--ink); }
+  .ev.ok { color:var(--muted); text-decoration:line-through; text-decoration-color:color-mix(in srgb, var(--muted) 60%, transparent); }
+  .ev.ok i { background:var(--pos); }
+  .ev.late { color:var(--crit); font-weight:600; }
+  .ev span { overflow:hidden; text-overflow:ellipsis; }
+  @media (max-width:640px) {
+    .day { min-height:54px; padding:6px 5px; border-radius:12px; align-items:center; }
+    .day .evs { display:flex; gap:3px; flex-wrap:wrap; justify-content:center; }
+    .ev { width:auto; } .ev span { display:none; }
+    .day.today::after { border-radius:12px; }
+  }
+  .cal.play .day { animation:lift .5s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i) * 14ms); }
+  .cal.play .day.past::before { animation:sweep .6s ease both; animation-delay:calc(var(--i) * 14ms + 120ms); }
+  .cal.play .ev i { animation:pop .45s cubic-bezier(.3,1.6,.5,1) both; animation-delay:calc(var(--i) * 14ms + 260ms); }
+  @keyframes lift { from { transform:translateY(8px) scale(.985); } to { transform:none; } }
+  @keyframes sweep { from { transform:translateX(-100%); } to { transform:none; } }
+  @keyframes pop { from { transform:scale(.3); } to { transform:none; } }
+  @keyframes ring { 0% { opacity:.9; transform:scale(1); } 70%, 100% { opacity:0; transform:scale(1.06); } }
+  @media (prefers-reduced-motion: reduce) { .cal.play .day, .cal.play .day.past::before, .cal.play .ev i, .day.today::after { animation:none; } }
+
+  .agenda { display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .agenda h4 { margin:0 0 4px; font-size:15px; font-weight:600; }
+  .ag { display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:10px; align-items:center; padding:10px 12px; border-radius:16px; background:color-mix(in srgb, var(--ink) 4%, transparent); }
+  .ag .d { text-align:center; line-height:1.05; }
+  .ag .d b { display:block; font-size:19px; font-weight:600; }
+  .ag .d small { font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  .ag .t { font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ag .s { font-size:12px; color:var(--muted); }
+  .ag .s.late { color:var(--crit); font-weight:600; } .ag .s.ok { color:var(--pos); font-weight:600; } .ag .s.soon { color:var(--warn); font-weight:600; }
+  .ag .a { font-weight:600; font-size:14px; white-space:nowrap; }
+  .ag .a.in { color:var(--pos); }
+  .ag.done { opacity:.6; }
+  .ag.next { background:var(--lime); color:var(--lime-ink); }
+  .ag.next .s, .ag.next .d small { color:color-mix(in srgb, var(--lime-ink) 70%, transparent); }
+  .nodate { font-size:12.5px; color:var(--muted); padding:4px 2px; }
+
   .tip {
     position:fixed; z-index:30; pointer-events:none; background:var(--night); color:var(--night-ink);
     padding:8px 11px; border-radius:12px; font-size:12.5px; line-height:1.4; max-width:230px;
@@ -324,6 +387,16 @@
     </section>
 
     <div class="glass paso" id="paso" hidden></div>
+
+    <section class="glass cal-card" id="calCard">
+      <div style="min-width:0">
+        <div class="cal-head"><h3 id="calTitle">Obligaciones del mes</h3><div class="cal-sum" id="calSum"></div></div>
+        <div class="wk" aria-hidden="true"><span>LUN</span><span>MAR</span><span>MIÉ</span><span>JUE</span><span>VIE</span><span>SÁB</span><span>DOM</span></div>
+        <div class="cal" id="cal"></div>
+        <div class="cal-legend"><span><span class="ev"><i></i></span>Pago fijo</span><span><span class="ev deuda"><i></i></span>Deuda que vence</span><span><span class="ev cobro"><i></i></span>Te pagan</span><span><span class="ev ok"><i></i></span>Ya registrado</span></div>
+      </div>
+      <div class="agenda" id="agenda"></div>
+    </section>
 
     <div class="filters">
       <h3>Movimientos <em id="nMov">0</em></h3>
@@ -513,6 +586,7 @@
 
     pintarDeuda();
     pintarPaso();
+    pintarCalendario();
     pintarFiltros(movs);
     pintarLista(movs);
     pintarDetalle(movs, gastado, pres, por);
@@ -574,6 +648,110 @@
       var p = el("span", "pill line", it.nombre + " " + usd(it.saldo, it.saldo % 1 ? 2 : 0) + (it.vence ? " · " + diaCorto(it.vence) : it.moneda ? " · " + it.moneda.toLowerCase() : ""));
       ot.appendChild(p);
     });
+    if (dd.activos && dd.activos.usdtPropios) {
+      var a = el("span", "pill ok", "Tuyos en Binance: " + grp(dd.activos.usdtPropios, 2) + " USDT");
+      ot.appendChild(a);
+    }
+  }
+
+  // ---------- calendario de obligaciones ----------
+  function eventosDelMes() {
+    var dd = deudasActuales(); if (!dd) return null;
+    var y = +MES.slice(0, 4), mo = +MES.slice(5), N = diasDelMes(MES);
+    var movs = D.movimientos.filter(function (m) { return m.mes === MES; });
+    var ev = [];
+    function iso(d) { return MES + "-" + String(d).padStart(2, "0"); }
+    (dd.obligaciones || []).forEach(function (o) {
+      if (o.dia) {
+        var d = Math.min(o.dia, N);
+        var pag = movs.some(function (m) {
+          if (m.tipo !== "Gasto") return false;
+          if (o.cat && m.cat === o.cat) return true;
+          var n = norm(m.nota);
+          return (o.match || []).some(function (k) { return n.indexOf(norm(k)) >= 0; });
+        });
+        ev.push({ dia:d, fecha:iso(d), nombre:o.nombre, monto:o.monto, tipo:"pago", ok:pag, nota:o.diaPorConfirmar ? "día por confirmar" : "" });
+      }
+      if (o.diaSemana != null) {
+        var cobros = movs.filter(function (m) { var n = norm(m.cat + " " + m.nota); return m.tipo === "Ingreso" && (o.match || []).some(function (k) { return n.indexOf(norm(k)) >= 0; }); }).length;
+        for (var d2 = 1; d2 <= N; d2++) {
+          if (new Date(y, mo - 1, d2).getDay() === o.diaSemana) {
+            ev.push({ dia:d2, fecha:iso(d2), nombre:o.nombre, monto:o.monto, tipo:"cobro", ok:cobros > 0 });
+            cobros--;
+          }
+        }
+      }
+    });
+    dd.items.filter(function (i) { return i.vence && i.vence.slice(0, 7) === MES; }).forEach(function (i) {
+      ev.push({ dia:+i.vence.slice(8, 10), fecha:i.vence, nombre:i.nombre, monto:i.inicial, tipo:"deuda", ok:i.saldo <= 0 });
+    });
+    ev.sort(function (a, b) { return a.dia - b.dia || (a.tipo === "cobro") - (b.tipo === "cobro"); });
+    return { ev:ev, sinDia:dd.sinDia || [] };
+  }
+
+  var calObs = null;
+  function pintarCalendario() {
+    var r = eventosDelMes(), card = $("calCard");
+    card.hidden = !r; if (!r) return;
+    var hoy = hoyCaracas(), N = diasDelMes(MES);
+    $("calTitle").textContent = "Obligaciones de " + MESES[+MES.slice(5) - 1];
+    var salidas = r.ev.filter(function (e) { return e.tipo !== "cobro"; });
+    var total = suma(salidas, "monto"), hecho = suma(salidas.filter(function (e) { return e.ok; }), "monto");
+    var entra = suma(r.ev.filter(function (e) { return e.tipo === "cobro"; }), "monto");
+    var cs = $("calSum"); cs.textContent = "";
+    cs.appendChild(el("span", "pill dark", "Salen " + usd(total, 0)));
+    cs.appendChild(el("span", "pill ok", "Pagado " + usd(hecho, 0)));
+    cs.appendChild(el("span", "pill line", "Entran " + usd(entra, 0) + " del concesionario"));
+
+    var cal = $("cal"); cal.textContent = ""; cal.classList.remove("play");
+    var first = new Date(+MES.slice(0, 4), +MES.slice(5) - 1, 1).getDay(), off = (first + 6) % 7, i = 0;
+    for (var k = 0; k < off; k++) { var e0 = el("div", "day empty"); e0.style.setProperty("--i", i++); cal.appendChild(e0); }
+    for (var d = 1; d <= N; d++) {
+      var f = MES + "-" + String(d).padStart(2, "0");
+      var cell = el("div", "day" + (f < hoy ? " past" : "") + (f === hoy ? " today" : ""));
+      cell.style.setProperty("--i", i++);
+      cell.appendChild(el("span", "n", String(d)));
+      var evs = el("div", "evs"), del = r.ev.filter(function (e) { return e.dia === d; }), tipTxt = [];
+      del.forEach(function (e) {
+        var late = !e.ok && f < hoy && e.tipo !== "cobro";
+        var x = el("div", "ev " + e.tipo + (e.ok ? " ok" : "") + (late ? " late" : ""));
+        x.appendChild(el("i")); x.appendChild(el("span", null, e.nombre.split(" · ")[0] + " " + usd(e.monto, e.monto % 1 ? 2 : 0)));
+        evs.appendChild(x);
+        tipTxt.push((e.tipo === "cobro" ? "+" : "") + e.nombre + " <b>" + usd(e.monto, e.monto % 1 ? 2 : 0) + "</b>" + (e.ok ? " ✓" : late ? " · ¿lo pagaste?" : ""));
+      });
+      cell.appendChild(evs);
+      if (tipTxt.length) tip(cell, "<b>" + d + " " + MESES[+MES.slice(5) - 1].slice(0, 3) + "</b><br>" + tipTxt.join("<br>"));
+      cal.appendChild(cell);
+    }
+    // animación al entrar en pantalla (desde estado visible)
+    if (calObs) calObs.disconnect();
+    if ("IntersectionObserver" in window) {
+      calObs = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { cal.classList.add("play"); calObs.disconnect(); } }); }, { threshold:.2 });
+      calObs.observe(cal);
+    } else cal.classList.add("play");
+
+    // agenda
+    var ag = $("agenda"); ag.textContent = "";
+    ag.appendChild(el("h4", null, "En orden"));
+    var marcado = false;
+    r.ev.forEach(function (e) {
+      var late = !e.ok && e.fecha < hoy && e.tipo !== "cobro";
+      var dl = diasEntre(hoy, e.fecha);
+      var esNext = !marcado && !e.ok && e.fecha >= hoy && e.tipo !== "cobro";
+      if (esNext) marcado = true;
+      var row = el("div", "ag" + (e.ok ? " done" : "") + (esNext ? " next" : ""));
+      var dd2 = el("div", "d"); dd2.appendChild(el("b", null, String(e.dia))); dd2.appendChild(el("small", null, ["dom","lun","mar","mié","jue","vie","sáb"][new Date(+e.fecha.slice(0,4), +e.fecha.slice(5,7) - 1, e.dia).getDay()]));
+      row.appendChild(dd2);
+      var c = el("div"); c.style.minWidth = "0";
+      c.appendChild(el("div", "t", e.nombre));
+      var st = e.ok ? (e.tipo === "cobro" ? "Cobrado ✓" : "Pagado ✓") : late ? "Pasó la fecha: ¿lo pagaste?" : e.tipo === "cobro" && dl < 0 ? "No está anotado como ingreso" : dl === 0 ? "Hoy" : dl === 1 ? "Mañana" : "En " + dl + " días";
+      if (e.nota && !e.ok) st += " · " + e.nota;
+      c.appendChild(el("div", "s" + (e.ok ? " ok" : late ? " late" : dl <= 3 && e.tipo !== "cobro" ? " soon" : ""), st));
+      row.appendChild(c);
+      row.appendChild(el("div", "a" + (e.tipo === "cobro" ? " in" : ""), (e.tipo === "cobro" ? "+" : "") + usd(e.monto, e.monto % 1 ? 2 : 0)));
+      ag.appendChild(row);
+    });
+    if (r.sinDia.length) ag.appendChild(el("div", "nodate", "Sin día fijo: " + r.sinDia.map(function (x) { return x.nombre + " " + usd(x.monto, 0); }).join(" · ")));
   }
 
   function pintarPaso() {
