@@ -661,8 +661,17 @@
     var movs = D.movimientos.filter(function (m) { return m.mes === MES; });
     var ev = [];
     function iso(d) { return MES + "-" + String(d).padStart(2, "0"); }
+    var pool = {};
+    (dd.obligaciones || []).filter(function (o) { return o.dia && o.tipo === "cobro"; }).sort(function (a, b) { return a.dia - b.dia; }).forEach(function (o) {
+      var key = (o.match || []).join("|");
+      if (pool[key] == null) pool[key] = suma(movs.filter(function (m) { var n = norm(m.cat + " " + m.nota); return m.tipo === "Ingreso" && (o.match || []).some(function (k) { return n.indexOf(norm(k)) >= 0; }); }), "usd");
+      var got = Math.min(pool[key], o.monto); pool[key] -= got;
+      var d0 = Math.min(o.dia, N);
+      ev.push({ dia:d0, fecha:iso(d0), nombre:o.nombre, monto:o.monto, tipo:"cobro", ok:got >= o.monto - 1,
+                nota:got > 0 && got < o.monto - 1 ? "adelantado " + usd(got, 0) + " de " + usd(o.monto, 0) : (o.nota || "") });
+    });
     (dd.obligaciones || []).forEach(function (o) {
-      if (o.dia) {
+      if (o.dia && o.tipo !== "cobro") {
         var d = Math.min(o.dia, N);
         var pag = movs.some(function (m) {
           if (m.tipo !== "Gasto") return false;
@@ -670,7 +679,7 @@
           var n = norm(m.nota);
           return (o.match || []).some(function (k) { return n.indexOf(norm(k)) >= 0; });
         });
-        ev.push({ dia:d, fecha:iso(d), nombre:o.nombre, monto:o.monto, tipo:"pago", ok:pag, nota:o.diaPorConfirmar ? "día por confirmar" : "" });
+        ev.push({ dia:d, fecha:iso(d), nombre:o.nombre, monto:o.monto, tipo:"pago", ok:pag, nota:o.nota || "" });
       }
       if (o.diaSemana != null) {
         var cobros = movs.filter(function (m) { var n = norm(m.cat + " " + m.nota); return m.tipo === "Ingreso" && (o.match || []).some(function (k) { return n.indexOf(norm(k)) >= 0; }); }).length;
@@ -701,7 +710,7 @@
     var cs = $("calSum"); cs.textContent = "";
     cs.appendChild(el("span", "pill dark", "Salen " + usd(total, 0)));
     cs.appendChild(el("span", "pill ok", "Pagado " + usd(hecho, 0)));
-    cs.appendChild(el("span", "pill line", "Entran " + usd(entra, 0) + " del concesionario"));
+    cs.appendChild(el("span", "pill line", "Entran " + usd(entra, 0)));
 
     var cal = $("cal"); cal.textContent = ""; cal.classList.remove("play");
     var first = new Date(+MES.slice(0, 4), +MES.slice(5) - 1, 1).getDay(), off = (first + 6) % 7, i = 0;
