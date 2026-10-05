@@ -28,17 +28,38 @@ async function datosDelSheet() {
   return d;
 }
 
+function descifrar(env) {
+  const key = crypto.pbkdf2Sync(clave, Buffer.from(env.salt, "base64"), env.iter, 32, "sha256");
+  const raw = Buffer.from(env.ct, "base64");
+  const d = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(env.iv, "base64"));
+  d.setAuthTag(raw.subarray(raw.length - 16));
+  return JSON.parse(Buffer.concat([d.update(raw.subarray(0, raw.length - 16)), d.final()]).toString("utf8"));
+}
+// Las deudas no viven en el Sheet: Atenea las mantiene cifradas en deudas.enc.json.
+function conDeudas(d) {
+  if (fs.existsSync("deudas.enc.json")) d.deudas = descifrar(JSON.parse(fs.readFileSync("deudas.enc.json", "utf8")));
+  return d;
+}
+
+const j = process.argv.indexOf("--deudas");
+if (j > 0) {
+  const dd = JSON.parse(fs.readFileSync(process.argv[j + 1], "utf8"));
+  fs.writeFileSync("deudas.enc.json", JSON.stringify(cifrar(dd)));
+  console.log("deudas.enc.json actualizado:", dd.items.length, "acreedores");
+  process.exit(0);
+}
+
 const i = process.argv.indexOf("--desde");
 if (i > 0) {
   const d = JSON.parse(fs.readFileSync(process.argv[i + 1], "utf8"));
-  fs.writeFileSync("data.enc.json", JSON.stringify(cifrar(d)));
+  fs.writeFileSync("data.enc.json", JSON.stringify(cifrar(conDeudas(d))));
   console.log("data.enc.json sembrado con", d.movimientos.length, "movimientos");
 } else {
   fs.mkdirSync("sitio", { recursive: true });
   fs.copyFileSync("index.html", "sitio/index.html");
   const d = await datosDelSheet();
   if (d) {
-    fs.writeFileSync("sitio/data.enc.json", JSON.stringify(cifrar(d)));
+    fs.writeFileSync("sitio/data.enc.json", JSON.stringify(cifrar(conDeudas(d))));
     console.log("Datos frescos del Sheet:", d.movimientos.length, "movimientos");
   } else {
     fs.copyFileSync("data.enc.json", "sitio/data.enc.json");
