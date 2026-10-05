@@ -552,7 +552,11 @@
       r.appendChild(el("div", "mv-d", diaCorto(m.fecha)));
       var c = el("div"); c.style.minWidth = "0";
       c.appendChild(el("div", "mv-t", m.nota || m.cat || m.tipo));
-      c.appendChild(el("div", "mv-c", m.tipo === "Gasto" ? m.cat : m.tipo + (m.cat ? " · " + m.cat : "")));
+      var sub = m.tipo === "Gasto" ? m.cat
+        : m.tipo === "Compra" ? "Compra de dólares · tasa " + grp(m.bs && m.monto ? m.bs / m.monto : 0, 2)
+        : m.tipo === "Cambio" ? "Cambio de USDT · tasa " + grp(m.bs && m.monto ? m.bs / m.monto : 0, 2)
+        : m.tipo + (m.cat ? " · " + m.cat : "");
+      c.appendChild(el("div", "mv-c", sub));
       r.appendChild(c);
       var esIng = m.tipo === "Ingreso", a = el("div", "mv-a" + (esIng ? " pos" : ""));
       if (m.tipo === "Gasto" || esIng) {
@@ -561,6 +565,9 @@
       } else if (m.tipo === "Cambio") {
         a.textContent = grp(m.monto, 2) + " " + m.moneda;
         a.appendChild(el("small", null, "→ " + bs(m.bs || 0)));
+      } else if (m.tipo === "Compra") {
+        a.textContent = "+" + (m.moneda === "USDT" ? grp(m.monto, 2) + " USDT" : usd(m.monto));
+        a.appendChild(el("small", null, "pagaste " + bs(m.bs || 0)));
       } else {
         a.textContent = m.moneda === "Bs" ? bs(m.monto) : grp(m.monto, 2) + " " + m.moneda;
         a.appendChild(el("small", null, "no es tuya"));
