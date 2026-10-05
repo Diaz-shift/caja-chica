@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Caja Chica de Daniel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Layout: una columna de teléfono; desde 760px las gráficas van de a dos. Arriba el número que manda: cuánto llevas gastado contra el presupuesto. */
+  :root {
+    --paper:#F1F4F2; --surface:#FFFFFF; --surface-2:#F6F8F7;
+    --ink:#141A18; --ink-2:#3E4A45; --muted:#68756F;
+    --line:#DCE3DF; --grid:#E8EDEA;
+    --series:#0B6E5F; --series-soft:#CFE5DF; --ref:#8A9690;
+    --pos:#0B6E5F; --warn:#A86A00; --warn-wash:#F6EBDA; --crit:#B3261E; --crit-wash:#F7E2E0;
+    --paso:#9A5B0C; --paso-wash:#F6EBDA;
+    --f-display:"Archivo", system-ui, -apple-system, sans-serif;
+    --f-body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --f-num:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#0D1211; --surface:#151C1A; --surface-2:#1B2422;
+      --ink:#E7EEEA; --ink-2:#B7C4BE; --muted:#86958F;
+      --line:#26312D; --grid:#1F2926;
+      --series:#3FC1A3; --series-soft:#1C4A40; --ref:#7E8D87;
+      --pos:#3FC1A3; --warn:#D9A13B; --warn-wash:#2E2416; --crit:#E66767; --crit-wash:#2E1A18;
+      --paso:#D79A4A; --paso-wash:#2E2416;
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0D1211; --surface:#151C1A; --surface-2:#1B2422;
+    --ink:#E7EEEA; --ink-2:#B7C4BE; --muted:#86958F;
+    --line:#26312D; --grid:#1F2926;
+    --series:#3FC1A3; --series-soft:#1C4A40; --ref:#7E8D87;
+    --pos:#3FC1A3; --warn:#D9A13B; --warn-wash:#2E2416; --crit:#E66767; --crit-wash:#2E1A18;
+    --paso:#D79A4A; --paso-wash:#2E2416;
+    color-scheme:dark;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; }
+  body {
+    background:var(--paper); color:var(--ink);
+    font-family:var(--f-body); font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased;
+    padding-inline:16px; padding-block:calc(16px + env(safe-area-inset-top, 0px)) calc(40px + env(safe-area-inset-bottom, 0px));
+  }
+  [hidden] { display:none !important; }
+  .num { font-family:var(--f-num); font-variant-numeric:tabular-nums; }
+  h1, h2 { font-family:var(--f-display); margin:0; text-wrap:balance; }
+  button, input { font:inherit; color:inherit; }
+  button:focus-visible, input:focus-visible { outline:2px solid var(--series); outline-offset:2px; }
+  .wrap { max-width:1040px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+  .eyebrow { font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); font-weight:600; }
+  .panel { background:var(--surface); border:1px solid var(--line); border-radius:14px; min-width:0; }
+  .pad { padding:16px; }
+  .panel h2 { font-size:15px; font-weight:600; letter-spacing:-.005em; }
+  .panel-head { display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .hint { font-size:12.5px; color:var(--muted); }
+
+  /* candado */
+  .lock { min-height:70vh; display:grid; place-items:center; }
+  .lock form { width:100%; max-width:360px; display:flex; flex-direction:column; gap:12px; }
+  .lock h1 { font-size:28px; letter-spacing:-.02em; }
+  .lock input[type=password] {
+    width:100%; padding:13px 14px; border-radius:12px; border:1px solid var(--line);
+    background:var(--surface); font-size:17px;
+  }
+  .check { display:flex; gap:8px; align-items:center; font-size:14px; color:var(--ink-2); }
+  .btn {
+    background:var(--series); color:var(--surface); border:0; border-radius:12px; padding:14px;
+    font-family:var(--f-display); font-weight:600; font-size:16px; cursor:pointer;
+  }
+  .btn:disabled { opacity:.5; cursor:wait; }
+  .err { color:var(--crit); font-size:13.5px; min-height:19px; }
+
+  /* cabecera */
+  .top { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  .brand { font-family:var(--f-display); font-weight:700; font-size:18px; letter-spacing:-.015em; }
+  .brand span { color:var(--muted); font-weight:500; }
+  .monthnav { display:flex; align-items:center; gap:8px; }
+  .monthnav b { font-family:var(--f-display); font-size:15px; text-transform:capitalize; min-width:120px; text-align:center; }
+  .navbtn { background:var(--surface); border:1px solid var(--line); border-radius:9px; width:34px; height:34px; cursor:pointer; color:var(--ink-2); font-size:17px; }
+  .navbtn:disabled { opacity:.35; cursor:default; }
+  .stamp { font-size:12px; color:var(--muted); }
+
+  /* héroe */
+  .hero { padding:18px 18px 16px; display:flex; flex-direction:column; gap:10px; }
+  .hero-fig { font-family:var(--f-display); font-weight:600; font-size:52px; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; }
+  .hero-fig .c { font-size:28px; color:var(--muted); }
+  .hero-sub { font-size:14px; color:var(--ink-2); }
+  .meter { height:8px; border-radius:99px; background:var(--grid); overflow:hidden; position:relative; }
+  .meter i { position:absolute; left:0; top:0; bottom:0; background:var(--series); border-radius:99px; }
+  .meter i.warn { background:var(--warn); } .meter i.crit { background:var(--crit); }
+  .meter .pace { position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--ink-2); }
+  .meter-legend { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); gap:10px; }
+  .badge { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; padding:3px 8px; border-radius:6px; }
+  .badge.warn { background:var(--warn-wash); color:var(--warn); }
+  .badge.crit { background:var(--crit-wash); color:var(--crit); }
+  .badge.ok { background:var(--series-soft); color:var(--ink); }
+
+  /* KPIs */
+  .kpis { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; }
+  @media (min-width:760px) { .kpis { grid-template-columns:repeat(4, minmax(0,1fr)); } }
+  .kpi { padding:13px 14px; display:flex; flex-direction:column; gap:3px; }
+  .kpi .v { font-family:var(--f-num); font-size:20px; font-weight:500; font-variant-numeric:tabular-nums; }
+  .kpi .v.neg { color:var(--crit); } .kpi .v.pos { color:var(--pos); }
+  .kpi .s { font-size:12px; color:var(--muted); }
+
+  .grid2 { display:grid; grid-template-columns:minmax(0,1fr); gap:14px; }
+  @media (min-width:760px) { .grid2 { grid-template-columns:minmax(0,1fr) minmax(0,1fr); } }
+
+  /* categorías */
+  .cats { display:flex; flex-direction:column; gap:12px; }
+  .cat-row { display:grid; grid-template-columns:96px minmax(0,1fr) auto; gap:10px; align-items:center; cursor:default; }
+  .cat-name { font-size:13.5px; color:var(--ink-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .track { position:relative; height:12px; }
+  .track i { position:absolute; left:0; top:0; bottom:0; background:var(--series); border-radius:0 4px 4px 0; min-width:2px; }
+  .track i.warn { background:var(--warn); } .track i.crit { background:var(--crit); }
+  .track .cap { position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--ink-2); border-radius:1px; }
+  .cat-val { font-family:var(--f-num); font-size:13px; text-align:right; white-space:nowrap; }
+  .cat-val small { display:block; font-family:var(--f-body); font-size:11px; color:var(--muted); }
+  .cat-val small.warn { color:var(--warn); font-weight:600; } .cat-val small.crit { color:var(--crit); font-weight:600; }
+
+  /* gráficas */
+  .chart { width:100%; position:relative; }
+  .chart svg { display:block; overflow:visible; }
+  .chart text { font-family:var(--f-num); font-size:11px; fill:var(--muted); }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-2); margin-bottom:8px; }
+  .legend span { display:inline-flex; align-items:center; gap:6px; }
+  .sw { width:14px; height:3px; border-radius:2px; background:var(--series); display:inline-block; }
+  .sw.ref { background:none; border-top:2px dashed var(--ref); height:0; }
+
+  /* plata de paso */
+  .paso { background:var(--paso-wash); border-color:color-mix(in srgb, var(--paso) 30%, transparent); }
+  .paso-row { display:flex; justify-content:space-between; gap:12px; align-items:baseline; padding:10px 0; border-top:1px solid color-mix(in srgb, var(--paso) 20%, transparent); }
+  .paso-row:first-of-type { border-top:0; }
+  .paso-row b { font-family:var(--f-num); color:var(--paso); white-space:nowrap; }
+
+  /* movimientos */
+  .mv { display:grid; grid-template-columns:52px minmax(0,1fr) auto; gap:10px; align-items:center; padding:10px 0; border-top:1px solid var(--grid); }
+  .mv:first-child { border-top:0; }
+  .mv-d { font-size:12px; color:var(--muted); font-family:var(--f-num); }
+  .mv-t { font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mv-c { font-size:12px; color:var(--muted); }
+  .mv-a { text-align:right; font-family:var(--f-num); font-size:13.5px; white-space:nowrap; }
+  .mv-a.pos { color:var(--pos); }
+  .mv-a small { display:block; font-size:11px; color:var(--muted); }
+  .more { margin-top:8px; background:none; border:1px solid var(--line); border-radius:9px; padding:8px 12px; cursor:pointer; font-size:13px; color:var(--ink-2); }
+
+  .tip {
+    position:fixed; z-index:20; pointer-events:none; background:var(--ink); color:var(--paper);
+    padding:7px 10px; border-radius:8px; font-size:12.5px; line-height:1.35; max-width:220px;
+    box-shadow:0 6px 20px -8px rgba(0,0,0,.4);
+  }
+  .tip b { font-family:var(--f-num); font-weight:600; }
+  .foot { font-size:12px; color:var(--muted); text-align:center; line-height:1.5; }
+  .foot button { background:none; border:0; padding:0; color:var(--ink-2); text-decoration:underline; cursor:pointer; font-size:12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="lock" id="lock">
+    <form id="lockForm" autocomplete="off">
+      <div class="eyebrow">Privado</div>
+      <h1>Caja Chica</h1>
+      <p class="hint" style="margin:0">Los datos están cifrados. Escribe tu clave para verlos.</p>
+      <input type="password" id="clave" placeholder="Clave" autocomplete="current-password" required>
+      <label class="check"><input type="checkbox" id="recordar" checked> Recordar en este equipo</label>
+      <button class="btn" id="abrir" type="submit">Abrir</button>
+      <div class="err" id="lockErr" role="alert"></div>
+    </form>
+  </section>
+
+  <main id="app" class="wrap" hidden>
+    <header class="top">
+      <div>
+        <div class="brand">Caja chica <span>de Daniel</span></div>
+        <div class="stamp" id="stamp"></div>
+      </div>
+      <div class="monthnav">
+        <button class="navbtn" id="prev" type="button" aria-label="Mes anterior">‹</button>
+        <b id="mesLbl"></b>
+        <button class="navbtn" id="next" type="button" aria-label="Mes siguiente">›</button>
+      </div>
+    </header>
+
+    <section class="panel hero">
+      <div class="eyebrow">Gastado en el mes</div>
+      <div class="hero-fig" id="heroFig"></div>
+      <div class="hero-sub" id="heroSub"></div>
+      <div class="meter" aria-hidden="true"><i id="meterFill"></i><span class="pace" id="meterPace"></span></div>
+      <div class="meter-legend"><span id="meterL"></span><span id="meterR"></span></div>
+    </section>
+
+    <section class="kpis">
+      <div class="panel kpi"><span class="eyebrow">Entró</span><span class="v pos" id="kIng"></span><span class="s" id="kIngS"></span></div>
+      <div class="panel kpi"><span class="eyebrow">Neto</span><span class="v" id="kNeto"></span><span class="s">Entró menos gastado</span></div>
+      <div class="panel kpi"><span class="eyebrow">Al cierre, a este ritmo</span><span class="v" id="kProy"></span><span class="s" id="kProyS"></span></div>
+      <div class="panel kpi"><span class="eyebrow">USDT de Rollo B en mano</span><span class="v" id="kUsdt"></span><span class="s" id="kTasa"></span></div>
+    </section>
+
+    <section class="panel pad paso" id="pasoPanel" hidden>
+      <div class="panel-head"><h2>Plata de paso: no es tuya</h2><span class="hint">Pendiente por entregar</span></div>
+      <div id="pasoList"></div>
+    </section>
+
+    <div class="grid2">
+      <section class="panel pad">
+        <div class="panel-head"><h2>Por categoría</h2><span class="hint">USD · la raya es el tope</span></div>
+        <div class="cats" id="cats"></div>
+      </section>
+      <section class="panel pad">
+        <div class="panel-head"><h2>Acumulado contra el presupuesto</h2><span class="hint">USD</span></div>
+        <div class="legend"><span><i class="sw"></i>Gastado</span><span><i class="sw ref"></i>Ritmo del presupuesto</span></div>
+        <div class="chart" id="cumChart"></div>
+      </section>
+    </div>
+
+    <section class="panel pad">
+      <div class="panel-head"><h2>Gasto por día</h2><span class="hint" id="diaHint">USD</span></div>
+      <div class="chart" id="dayChart"></div>
+    </section>
+
+    <section class="panel pad">
+      <div class="panel-head"><h2>Movimientos</h2><span class="hint" id="movHint"></span></div>
+      <div id="movs"></div>
+      <button class="more" id="more" type="button" hidden>Ver todos</button>
+    </section>
+
+    <p class="foot">Se actualiza solo a las 7:00 am y 7:00 pm. Para anotar, usa el formulario.<br>
+      <button id="salir" type="button">Olvidar la clave en este equipo</button></p>
+  </main>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  var MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  var KEY_STORE = "caja-chica-llave";
+  var D = null, MES = null, verTodos = false;
+
+  // ---------- formato ----------
+  function grp(n, dec) {
+    var s = Math.abs(n).toFixed(dec).split(".");
+    return s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".") + (dec ? "," + s[1] : "");
+  }
+  function usd(n, dec) { dec = dec == null ? 2 : dec; return (n < 0 ? "−$" : "$") + grp(n, dec); }
+  function bs(n) { return "Bs " + grp(n, 2); }
+  function diaCorto(iso) { var p = iso.split("-"); return (+p[2]) + " " + MESES[+p[1] - 1].slice(0, 3); }
+  function mesNombre(m) { var p = m.split("-"); return MESES[+p[1] - 1] + " " + p[0]; }
+  function diasDelMes(m) { var p = m.split("-"); return new Date(+p[0], +p[1], 0).getDate(); }
+  function hoyCaracas() {
+    var s = new Intl.DateTimeFormat("en-CA", { timeZone:"America/Caracas", year:"numeric", month:"2-digit", day:"2-digit" }).format(new Date());
+    return s; // yyyy-mm-dd
+  }
+  function el(tag, cls, txt) { var n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; }
+  function $(id) { return document.getElementById(id); }
+
+  // ---------- cifrado ----------
+  function b64(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  function tob64(buf) { var u = new Uint8Array(buf), s = ""; for (var i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); }
+  function derivar(clave, env) {
+    return crypto.subtle.importKey("raw", new TextEncoder().encode(clave), "PBKDF2", false, ["deriveKey"]).then(function (base) {
+      return crypto.subtle.deriveKey({ name:"PBKDF2", salt:b64(env.salt), iterations:env.iter, hash:"SHA-256" },
+        base, { name:"AES-GCM", length:256 }, true, ["decrypt"]);
+    });
+  }
+  function abrirCon(key, env) {
+    return crypto.subtle.decrypt({ name:"AES-GCM", iv:b64(env.iv) }, key, b64(env.ct)).then(function (pt) {
+      return JSON.parse(new TextDecoder().decode(pt));
+    });
+  }
+  function cargarSobre() {
+    return fetch("data.enc.json?t=" + Date.now(), { cache:"no-store" }).then(function (r) {
+      if (!r.ok) throw new Error("sin datos");
+      return r.json();
+    });
+  }
+  function guardarLlave(key, env) {
+    return crypto.subtle.exportKey("raw", key).then(function (raw) {
+      try { localStorage.setItem(KEY_STORE, JSON.stringify({ salt:env.salt, k:tob64(raw) })); } catch (e) {}
+    });
+  }
+  function llaveGuardada(env) {
+    var g = null;
+    try { g = JSON.parse(localStorage.getItem(KEY_STORE) || "null"); } catch (e) {}
+    if (!g || g.salt !== env.salt) return Promise.resolve(null);
+    return crypto.subtle.importKey("raw", b64(g.k), { name:"AES-GCM" }, false, ["decrypt"]);
+  }
+
+  var SOBRE = null;
+  function iniciar() {
+    cargarSobre().then(function (env) {
+      SOBRE = env;
+      return llaveGuardada(env).then(function (key) {
+        if (!key) return null;
+        return abrirCon(key, env).catch(function () { return null; });
+      });
+    }).then(function (data) {
+      if (data) mostrar(data);
+    }).catch(function () {
+      $("lockErr").textContent = "No pude cargar los datos. Revisa tu conexión y recarga.";
+    });
+  }
+
+  $("lockForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    if (!SOBRE) { $("lockErr").textContent = "Todavía cargando los datos. Intenta en un segundo."; return; }
+    var btn = $("abrir"); btn.disabled = true; btn.textContent = "Abriendo…"; $("lockErr").textContent = "";
+    var key;
+    derivar($("clave").value, SOBRE).then(function (k) { key = k; return abrirCon(k, SOBRE); }).then(function (data) {
+      if ($("recordar").checked) guardarLlave(key, SOBRE);
+      mostrar(data);
+    }).catch(function () {
+      $("lockErr").textContent = "Clave incorrecta. Revisa mayúsculas, tildes y espacios.";
+    }).then(function () { btn.disabled = false; btn.textContent = "Abrir"; });
+  });
+  $("salir").onclick = function () { try { localStorage.removeItem(KEY_STORE); } catch (e) {} location.reload(); };
+
+  // ---------- datos ----------
+  function mostrar(data) {
+    D = data;
+    $("lock").hidden = true; $("app").hidden = false;
+    var meses = mesesDisponibles();
+    var hoyM = hoyCaracas().slice(0, 7);
+    MES = meses.indexOf(hoyM) >= 0 ? hoyM : meses[meses.length - 1];
+    var g = new Date(D.generado);
+    $("stamp").textContent = "Actualizado " + new Intl.DateTimeFormat("es-VE", { timeZone:"America/Caracas", day:"numeric", month:"short", hour:"numeric", minute:"2-digit" }).format(g);
+    pintar();
+  }
+  function mesesDisponibles() {
+    var s = {};
+    D.movimientos.forEach(function (m) { if (m.mes) s[m.mes] = 1; });
+    var hoyM = hoyCaracas().slice(0, 7); s[hoyM] = 1;
+    return Object.keys(s).sort();
+  }
+  $("prev").onclick = function () { mover(-1); };
+  $("next").onclick = function () { mover(1); };
+  function mover(d) {
+    var ms = mesesDisponibles(), i = ms.indexOf(MES) + d;
+    if (i >= 0 && i < ms.length) { MES = ms[i]; verTodos = false; pintar(); }
+  }
+
+  function pintar() {
+    var ms = mesesDisponibles(), i = ms.indexOf(MES);
+    $("mesLbl").textContent = mesNombre(MES);
+    $("prev").disabled = i <= 0; $("next").disabled = i >= ms.length - 1;
+
+    var movs = D.movimientos.filter(function (m) { return m.mes === MES; });
+    var gastos = movs.filter(function (m) { return m.tipo === "Gasto"; });
+    var ingresos = movs.filter(function (m) { return m.tipo === "Ingreso"; });
+    var gastado = suma(gastos, "usd"), entro = suma(ingresos, "usd");
+    var gastadoBs = suma(gastos.filter(function (m) { return m.moneda === "Bs"; }), "monto");
+    var pres = Object.keys(D.presupuesto).reduce(function (s, k) { return s + (D.presupuesto[k] || 0); }, 0);
+    var N = diasDelMes(MES), hoy = hoyCaracas();
+    var esActual = hoy.slice(0, 7) === MES;
+    var dia = esActual ? +hoy.slice(8, 10) : N;
+
+    // héroe
+    var t = usd(gastado), k = t.lastIndexOf(",");
+    var hf = $("heroFig"); hf.textContent = t.slice(0, k); hf.appendChild(el("span", "c", t.slice(k)));
+    var ritmo = pres * dia / N;
+    var sub = $("heroSub"); sub.textContent = "";
+    if (pres > 0) {
+      var pct = gastado / pres;
+      var cls = pct > 1 ? "crit" : gastado > ritmo ? "warn" : "ok";
+      var txt = pct > 1 ? "▲ Te pasaste por " + usd(gastado - pres) : gastado > ritmo ? "▲ Vas " + usd(gastado - ritmo, 0) + " por encima del ritmo" : "● Dentro del ritmo";
+      sub.appendChild(el("span", "badge " + cls, txt));
+      sub.appendChild(document.createTextNode("  de " + usd(pres, 0) + " de presupuesto · " + (gastadoBs ? bs(gastadoBs) + " pagados en bolívares" : "")));
+      var f = $("meterFill"); f.style.width = Math.min(100, pct * 100) + "%"; f.className = cls === "ok" ? "" : cls;
+      $("meterPace").style.left = "calc(" + Math.min(100, dia / N * 100) + "% - 1px)";
+      $("meterPace").hidden = !esActual;
+      $("meterL").textContent = Math.round(pct * 100) + "% usado";
+      $("meterR").textContent = esActual ? "Raya: día " + dia + " de " + N + " (" + usd(ritmo, 0) + ")" : "Mes cerrado";
+    } else {
+      sub.textContent = "Sin presupuesto cargado";
+    }
+
+    // KPIs
+    $("kIng").textContent = usd(entro);
+    $("kIngS").textContent = ingresos.length + (ingresos.length === 1 ? " ingreso" : " ingresos");
+    var neto = entro - gastado;
+    $("kNeto").textContent = usd(neto); $("kNeto").className = "v " + (neto < 0 ? "neg" : "pos");
+    if (esActual && dia > 0) {
+      var proy = gastado / dia * N;
+      $("kProy").textContent = usd(proy, 0);
+      $("kProy").className = "v" + (pres > 0 && proy > pres ? " neg" : "");
+      $("kProyS").textContent = "Estimado: gasto diario " + usd(gastado / dia, 0) + " × " + N + " días";
+    } else {
+      $("kProy").textContent = usd(gastado, 0); $("kProy").className = "v"; $("kProyS").textContent = "Mes cerrado";
+    }
+    $("kUsdt").textContent = grp(D.usdtEnPoder || 0, 2);
+    $("kTasa").textContent = "Tasa " + grp(D.tasa || 0, 2) + (D.tasaFuente ? " · " + D.tasaFuente : "");
+
+    pintarPaso();
+    pintarCats(gastos);
+    pintarAcumulado(gastos, pres, N, dia, esActual);
+    pintarDias(gastos, N);
+    pintarMovs(movs);
+  }
+  function suma(a, k) { return a.reduce(function (s, m) { return s + (Number(m[k]) || 0); }, 0); }
+
+  function pintarPaso() {
+    var p = D.movimientos.filter(function (m) { return m.tipo === "De paso" && m.estado !== "Entregado"; });
+    $("pasoPanel").hidden = !p.length;
+    var box = $("pasoList"); box.textContent = "";
+    p.forEach(function (m) {
+      var r = el("div", "paso-row");
+      var l = el("div");
+      l.appendChild(el("div", null, m.cat || "Sin nombre"));
+      l.appendChild(el("div", "hint", (m.nota || "") + " · desde el " + diaCorto(m.fecha)));
+      r.appendChild(l);
+      r.appendChild(el("b", null, m.moneda === "Bs" ? bs(m.monto) : grp(m.monto, 2) + " " + m.moneda));
+      box.appendChild(r);
+    });
+  }
+
+  function pintarCats(gastos) {
+    var por = {};
+    gastos.forEach(function (m) { por[m.cat] = (por[m.cat] || 0) + (m.usd || 0); });
+    var cats = Object.keys(por).concat(Object.keys(D.presupuesto).filter(function (c) { return D.presupuesto[c] > 0 && !por[c]; }));
+    cats.sort(function (a, b) { return (por[b] || 0) - (por[a] || 0); });
+    var maxV = 0;
+    cats.forEach(function (c) { maxV = Math.max(maxV, por[c] || 0, D.presupuesto[c] || 0); });
+    var box = $("cats"); box.textContent = "";
+    if (!cats.length) { box.appendChild(el("div", "hint", "Sin gastos este mes.")); return; }
+    cats.forEach(function (c) {
+      var v = por[c] || 0, cap = D.presupuesto[c] || 0;
+      var row = el("div", "cat-row");
+      row.appendChild(el("div", "cat-name", c));
+      var tr = el("div", "track"), fill = el("i");
+      var st = cap > 0 ? (v > cap ? "crit" : v > cap * .8 ? "warn" : "") : "";
+      fill.className = st;
+      fill.style.width = (maxV ? v / maxV * 100 : 0) + "%";
+      tr.appendChild(fill);
+      if (cap > 0) { var k = el("span", "cap"); k.style.left = "calc(" + (cap / maxV * 100) + "% - 1px)"; tr.appendChild(k); }
+      row.appendChild(tr);
+      var val = el("div", "cat-val", usd(v));
+      var sm = el("small", st, cap > 0 ? (v > cap ? "▲ pasado por " + usd(v - cap, 0) : "de " + usd(cap, 0)) : "sin tope");
+      val.appendChild(sm);
+      row.appendChild(val);
+      tip(row, "<b>" + c + "</b><br>" + usd(v) + (cap > 0 ? " de " + usd(cap, 0) + " (" + Math.round(v / cap * 100) + "%)" : " · sin tope"));
+      box.appendChild(row);
+    });
+  }
+
+  // ---------- gráficas SVG ----------
+  var NS = "http://www.w3.org/2000/svg";
+  function s(tag, attrs) { var n = document.createElementNS(NS, tag); for (var k in attrs) n.setAttribute(k, attrs[k]); return n; }
+  function niceMax(v) {
+    if (v <= 0) return 10;
+    var raw = v / 4, p = Math.pow(10, Math.floor(Math.log10(raw))), steps = [1, 2, 2.5, 5, 10], st = p;
+    for (var i = 0; i < steps.length; i++) { if (steps[i] * p >= raw) { st = steps[i] * p; break; } }
+    return { max: st * Math.ceil(v / st), step: st };
+  }
+  function ejes(svg, W, H, m, nm) {
+    for (var y = 0; y <= nm.max + 1e-9; y += nm.step) {
+      var py = m.t + (H - m.t - m.b) * (1 - y / nm.max);
+      svg.appendChild(s("line", { x1:m.l, x2:W - m.r, y1:py, y2:py, stroke:"var(--grid)", "stroke-width":1 }));
+      var tx = s("text", { x:m.l - 6, y:py + 4, "text-anchor":"end" }); tx.textContent = "$" + grp(y, 0); svg.appendChild(tx);
+    }
+  }
+
+  function pintarAcumulado(gastos, pres, N, dia, esActual) {
+    var box = $("cumChart"); box.textContent = "";
+    var W = box.clientWidth || 320, H = 210, m = { t:12, r:64, b:24, l:44 };
+    var porDia = new Array(N + 1).fill(0);
+    gastos.forEach(function (g) { porDia[+g.fecha.slice(8, 10)] += g.usd || 0; });
+    var acum = [0], hasta = esActual ? dia : N;
+    for (var d = 1; d <= N; d++) acum[d] = acum[d - 1] + porDia[d];
+    var nm = niceMax(Math.max(pres, acum[hasta]) * 1.05);
+    var svg = s("svg", { width:W, height:H, role:"img", "aria-label":"Gasto acumulado contra el ritmo del presupuesto" });
+    ejes(svg, W, H, m, nm);
+    function X(d) { return m.l + (W - m.l - m.r) * (d / N); }
+    function Y(v) { return m.t + (H - m.t - m.b) * (1 - v / nm.max); }
+    [1, 10, 20, N].forEach(function (d) { var tx = s("text", { x:X(d), y:H - 6, "text-anchor":"middle" }); tx.textContent = d; svg.appendChild(tx); });
+    if (pres > 0) {
+      svg.appendChild(s("line", { x1:X(0), y1:Y(0), x2:X(N), y2:Y(pres), stroke:"var(--ref)", "stroke-width":2, "stroke-dasharray":"5 4" }));
+      var lr = s("text", { x:X(N) + 6, y:Y(pres) + 4, fill:"var(--ink-2)" }); lr.textContent = usd(pres, 0); svg.appendChild(lr);
+    }
+    var pts = [];
+    for (var j = 0; j <= hasta; j++) pts.push(X(j).toFixed(1) + "," + Y(acum[j]).toFixed(1));
+    svg.appendChild(s("polygon", { points: X(0) + "," + Y(0) + " " + pts.join(" ") + " " + X(hasta) + "," + Y(0), fill:"var(--series-soft)", opacity:.55 }));
+    svg.appendChild(s("polyline", { points:pts.join(" "), fill:"none", stroke:"var(--series)", "stroke-width":2, "stroke-linejoin":"round" }));
+    svg.appendChild(s("circle", { cx:X(hasta), cy:Y(acum[hasta]), r:4.5, fill:"var(--series)", stroke:"var(--surface)", "stroke-width":2 }));
+    var ll = s("text", { x:X(hasta) + 8, y:Y(acum[hasta]) - 6, fill:"var(--ink)", "font-weight":600 }); ll.textContent = usd(acum[hasta], 0); svg.appendChild(ll);
+    // cruz + tooltip
+    var cross = s("line", { y1:m.t, y2:H - m.b, stroke:"var(--ink-2)", "stroke-width":1, opacity:0 });
+    svg.appendChild(cross);
+    var hit = s("rect", { x:m.l, y:m.t, width:W - m.l - m.r, height:H - m.t - m.b, fill:"transparent" });
+    svg.appendChild(hit);
+    function mov(ev) {
+      var r = svg.getBoundingClientRect(), d = Math.round((ev.clientX - r.left - m.l) / (W - m.l - m.r) * N);
+      d = Math.max(1, Math.min(hasta, d));
+      cross.setAttribute("x1", X(d)); cross.setAttribute("x2", X(d)); cross.setAttribute("opacity", .5);
+      mostrarTip(ev, "<b>Día " + d + "</b><br>Gastado: <b>" + usd(acum[d]) + "</b>" + (pres > 0 ? "<br>Ritmo: " + usd(pres * d / N) : ""));
+    }
+    hit.addEventListener("pointermove", mov);
+    hit.addEventListener("pointerdown", mov);
+    hit.addEventListener("pointerleave", function () { cross.setAttribute("opacity", 0); ocultarTip(); });
+    box.appendChild(svg);
+  }
+
+  function pintarDias(gastos, N) {
+    var box = $("dayChart"); box.textContent = "";
+    var W = box.clientWidth || 320, H = 190, m = { t:12, r:8, b:24, l:44 };
+    var porDia = new Array(N + 1).fill(0), detalle = {};
+    gastos.forEach(function (g) {
+      var d = +g.fecha.slice(8, 10); porDia[d] += g.usd || 0;
+      (detalle[d] = detalle[d] || {}); detalle[d][g.cat] = (detalle[d][g.cat] || 0) + (g.usd || 0);
+    });
+    var maxD = Math.max.apply(null, porDia);
+    var nm = niceMax(maxD * 1.08);
+    var svg = s("svg", { width:W, height:H, role:"img", "aria-label":"Gasto por día del mes" });
+    ejes(svg, W, H, m, nm);
+    var slot = (W - m.l - m.r) / N, bw = Math.max(3, slot - 2);
+    var base = H - m.b;
+    for (var d = 1; d <= N; d++) {
+      var x = m.l + slot * (d - 1) + (slot - bw) / 2, v = porDia[d];
+      if (v > 0) {
+        var h = Math.max(2, (H - m.t - m.b) * v / nm.max), y = base - h, r = Math.min(4, bw / 2, h);
+        svg.appendChild(s("path", { d:"M" + x + "," + base + "V" + (y + r) + "Q" + x + "," + y + " " + (x + r) + "," + y + "H" + (x + bw - r) + "Q" + (x + bw) + "," + y + " " + (x + bw) + "," + (y + r) + "V" + base + "Z", fill:"var(--series)" }));
+      }
+      if (d === 1 || d % 5 === 0) { var tx = s("text", { x:x + bw / 2, y:H - 6, "text-anchor":"middle" }); tx.textContent = d; svg.appendChild(tx); }
+      (function (d, v) {
+        var hit = s("rect", { x:m.l + slot * (d - 1), y:m.t, width:slot, height:H - m.t - m.b, fill:"transparent" });
+        var html = "<b>" + d + " " + MESES[+MES.slice(5) - 1].slice(0, 3) + "</b>: <b>" + usd(v) + "</b>";
+        if (detalle[d]) Object.keys(detalle[d]).sort(function (a, b) { return detalle[d][b] - detalle[d][a]; }).forEach(function (c) { html += "<br>" + c + " " + usd(detalle[d][c]); });
+        tipSvg(hit, html);
+        svg.appendChild(hit);
+      })(d, v);
+    }
+    var top = porDia.indexOf(maxD);
+    if (maxD > 0) $("diaHint").textContent = "USD · día más caro: " + top + " (" + usd(maxD, 0) + ")";
+    box.appendChild(svg);
+  }
+
+  function pintarMovs(movs) {
+    var orden = movs.slice().sort(function (a, b) { return a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : (b.i || 0) - (a.i || 0); });
+    var box = $("movs"); box.textContent = "";
+    var lista = verTodos ? orden : orden.slice(0, 12);
+    $("movHint").textContent = movs.length + " en el mes";
+    lista.forEach(function (m) {
+      var r = el("div", "mv");
+      r.appendChild(el("div", "mv-d", diaCorto(m.fecha)));
+      var c = el("div"); c.style.minWidth = "0";
+      c.appendChild(el("div", "mv-t", m.nota || m.cat || m.tipo));
+      c.appendChild(el("div", "mv-c", m.tipo === "Gasto" ? m.cat : m.tipo + (m.cat ? " · " + m.cat : "")));
+      r.appendChild(c);
+      var esIng = m.tipo === "Ingreso", a = el("div", "mv-a" + (esIng ? " pos" : ""));
+      if (m.tipo === "Gasto" || esIng) {
+        a.textContent = (esIng ? "+" : "−") + usd(m.usd || 0);
+        if (m.moneda === "Bs") a.appendChild(el("small", null, bs(m.monto)));
+      } else if (m.tipo === "Cambio") {
+        a.textContent = grp(m.monto, 2) + " " + m.moneda;
+        a.appendChild(el("small", null, "→ " + bs(m.bs || 0)));
+      } else {
+        a.textContent = m.moneda === "Bs" ? bs(m.monto) : grp(m.monto, 2) + " " + m.moneda;
+        a.appendChild(el("small", null, "no es tuya"));
+      }
+      r.appendChild(a);
+      box.appendChild(r);
+    });
+    $("more").hidden = orden.length <= 12;
+    $("more").textContent = verTodos ? "Ver menos" : "Ver los " + orden.length;
+  }
+  $("more").onclick = function () { verTodos = !verTodos; pintar(); };
+
+  // ---------- tooltip ----------
+  var TIP = $("tip");
+  function mostrarTip(ev, html) {
+    TIP.innerHTML = html; TIP.hidden = false;
+    var x = ev.clientX + 12, y = ev.clientY - 12 - TIP.offsetHeight;
+    if (x + TIP.offsetWidth > innerWidth - 8) x = ev.clientX - 12 - TIP.offsetWidth;
+    if (y < 8) y = ev.clientY + 16;
+    TIP.style.left = Math.max(8, x) + "px"; TIP.style.top = y + "px";
+  }
+  function ocultarTip() { TIP.hidden = true; }
+  function tip(node, html) {
+    node.addEventListener("pointermove", function (ev) { mostrarTip(ev, html); });
+    node.addEventListener("pointerdown", function (ev) { mostrarTip(ev, html); });
+    node.addEventListener("pointerleave", ocultarTip);
+  }
+  var tipSvg = tip;
+  document.addEventListener("scroll", ocultarTip, { passive:true });
+
+  var rz = null;
+  addEventListener("resize", function () { clearTimeout(rz); rz = setTimeout(function () { if (D) pintar(); }, 150); });
+
+  iniciar();
+})();
+</script>
+</body>
+</html>
