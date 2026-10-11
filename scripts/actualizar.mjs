@@ -59,6 +59,7 @@ if (i > 0) {
   fs.copyFileSync("index.html", "sitio/index.html");
   fs.mkdirSync("sitio/anotar", { recursive: true });
   fs.copyFileSync("anotar/index.html", "sitio/anotar/index.html");
+  fs.copyFileSync("apple-touch-icon.png", "sitio/apple-touch-icon.png");
   const d = await datosDelSheet();
   if (d) {
     fs.writeFileSync("sitio/data.enc.json", JSON.stringify(cifrar(conDeudas(d))));
