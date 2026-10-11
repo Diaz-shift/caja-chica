@@ -112,7 +112,7 @@
   }
   .capsule button[aria-pressed="true"] { background:var(--lime); color:var(--lime-ink); font-weight:600; }
   .bar-right { display:flex; gap:8px; align-items:center; }
-  @media (max-width:720px) { .capsule { order:3; width:100%; } }
+  @media (max-width:720px) { .capsule { order:3; width:fit-content; } }
 
   .title-row { display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap; padding:4px 4px 0; }
   .title { font-size:46px; font-weight:500; letter-spacing:-.035em; line-height:1; margin:0; text-transform:capitalize; }
@@ -143,10 +143,10 @@
   .pace-track i { position:absolute; left:0; top:0; bottom:0; border-radius:6px; background:var(--ink); }
   .pace-track i.crit { background:var(--crit); }
   .pace-track b { position:absolute; top:-5px; bottom:-5px; width:3px; border-radius:2px; background:var(--lime-2); box-shadow:0 0 0 2px var(--glass-edge); }
-  .pace-lbl { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); gap:8px; }
+  .pace-lbl { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); gap:8px; white-space:nowrap; }
 
   /* deuda */
-  .debt-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .debt-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap; }
   .debt-big { font-size:38px; }
   .tiles { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)) auto; gap:8px; align-items:end; }
   .tile {
@@ -309,7 +309,7 @@
   .ag { display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:10px; align-items:center; padding:10px 12px; border-radius:16px; background:color-mix(in srgb, var(--ink) 4%, transparent); }
   .ag .d { text-align:center; line-height:1.05; }
   .ag .d b { display:block; font-size:19px; font-weight:600; }
-  .ag .d small { font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  .ag .d small { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
   .ag .t { font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .ag .s { font-size:12px; color:var(--muted); }
   .ag .s.late { color:var(--crit); font-weight:600; } .ag .s.ok { color:var(--pos); font-weight:600; } .ag .s.soon { color:var(--warn); font-weight:600; }
@@ -327,8 +327,35 @@
   }
   .tip b { font-weight:600; }
   .footer { font-size:12px; color:var(--muted); text-align:center; line-height:1.6; }
-  .footer button { background:none; border:0; padding:0; color:var(--ink-2); text-decoration:underline; font-size:12px; }
+  .footer button { background:none; border:0; padding:12px 8px; color:var(--ink-2); text-decoration:underline; font-size:12px; }
   @media (prefers-reduced-motion: reduce) { .row { transition:none; } }
+
+  /* Teléfono (11 oct): tocar no selecciona texto ni saca la lupa de iOS; sin zoom por doble toque. */
+  html { -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+  .cal, .wk, .comp, .tiles, .plan, .pace-track, .list, .agenda, .seg-ctl, .months, .night, svg {
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+  }
+  .day.tocado, .seg.tocado { outline:2px solid var(--lime); outline-offset:1px; }
+  .tile span { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  @media (max-width:640px) {
+    .ev i { width:8px; height:8px; }
+    .seg .v .cap { display:none; }
+    .seg-ctl { flex-wrap:nowrap; overflow-x:auto; max-width:100%; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+    .seg-ctl::-webkit-scrollbar { display:none; }
+    .seg-ctl button { flex:1 1 auto; justify-content:center; padding:8px 10px; }
+    .seg-ctl button span { display:none; }  /* en teléfono el conteo ya está en el título */
+    .filters { flex-wrap:wrap; min-width:0; }
+    .filters .seg-ctl { width:100%; min-width:0; }
+    .wrap, .wrap > *, main, main > * { min-width:0; max-width:100%; }
+  }
+  @media (max-width:380px) {
+    .pace-lbl { white-space:normal; }
+    .d-foot { gap:8px; padding:12px; }
+    .d-foot .money { font-size:15px; white-space:nowrap; }
+    .d-foot .k { font-size:11px; }
+    .d-foot .money .cur, .d-foot .money .dec { font-size:11px; }
+    .debt-big { font-size:34px; }
+  }
 </style>
 </head>
 <body>
@@ -427,7 +454,7 @@
       </article>
     </section>
 
-    <p class="footer">Se actualiza solo a las 7:00 am y 7:00 pm (Caracas). Lo que anotes ahora aparece en la próxima actualización.<br>
+    <p class="footer">Se actualiza al minuto de cada registro y, por si acaso, a las 7:00 am y 7:00 pm (Caracas).<br>
       <button id="salir" type="button">Olvidar la clave en este equipo</button></p>
   </main>
 </div>
@@ -439,7 +466,7 @@
   var MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
   var KEY_STORE = "caja-chica-llave";
   var D = null, MES = null, FILTRO = "Gasto", SEL = null, verTodos = false, SOBRE = null, LLAVE = null;
-  var FILTROS = [["Gasto","Gastos"],["Ingreso","Ingresos"],["dinero","Cambios y de paso"],["todos","Todo"]];
+  var FILTROS = [["Gasto","Gastos"],["Ingreso","Ingresos"],["dinero","Cambios"],["todos","Todo"]];
 
   // ---------- formato ----------
   function grp(n, dec) {
@@ -579,7 +606,8 @@
       var sg = el("div", "seg"); sg.style.flex = Math.max(por[c], gastado * .06) + " 1 0";
       sg.appendChild(el("span", "name", c));
       sg.appendChild(el("span", "stripe hatch" + (over ? " crit" : "")));
-      sg.appendChild(el("span", "v", usd(por[c], 0) + (cap2 > 0 ? " de " + usd(cap2, 0) : "")));
+      var vv = el("span", "v", usd(por[c], 0)); if (cap2 > 0) vv.appendChild(el("small", "cap", " de " + usd(cap2, 0)));
+      sg.appendChild(vv);
       tip(sg, "<b>" + c + "</b><br>" + usd(por[c]) + " · " + Math.round(por[c] / (gastado || 1) * 100) + "% del mes" + (cap2 > 0 ? "<br>Tope " + usd(cap2, 0) + (over ? " · pasado" : "") : "<br>Sin tope"));
       comp.appendChild(sg);
     });
@@ -599,8 +627,8 @@
       rp.textContent = gastado > pres ? "▲ Pasado por " + usd(gastado - pres, 0) : gastado > ritmo ? "▲ " + usd(gastado - ritmo, 0) + " sobre el ritmo" : "● Dentro del ritmo";
       var f = $("paceFill"); f.style.width = Math.min(100, gastado / pres * 100) + "%"; f.className = gastado > pres ? "crit" : "";
       $("paceMark").style.left = "calc(" + (dia / N * 100) + "% - 1px)"; $("paceMark").hidden = !esActual;
-      $("paceL").textContent = Math.round(gastado / pres * 100) + "% de " + usd(pres, 0) + " de presupuesto";
-      $("paceR").textContent = esActual ? "Raya lima: día " + dia + " de " + N : "Mes cerrado";
+      $("paceL").textContent = Math.round(gastado / pres * 100) + "% del tope (" + usd(pres, 0) + ")";
+      $("paceR").textContent = esActual ? "Marca lima = hoy (" + dia + "/" + N + ")" : "Mes cerrado";
     }
 
     pintarDeuda();
@@ -654,7 +682,7 @@
       var sub = el("span", null, it.nombre.replace("Rollo B · ", ""));
       tl.appendChild(sub);
       if (it.id === "rb-usdt" && D.usdtEnPoder != null) tl.appendChild(el("span", null, grp(D.usdtEnPoder, 0) + " en mano"));
-      else if (it.vence) { var dl = diasEntre(hoy, it.vence); tl.appendChild(el("span", "due" + (dl <= 3 ? " crit" : ""), dl < 0 ? "Vencida" : dl === 0 ? "Vence hoy" : "Vence en " + dl + " d · " + diaCorto(it.vence))); }
+      else if (it.vence) { var dl = diasEntre(hoy, it.vence); tl.appendChild(el("span", "due" + (dl <= 3 ? " crit" : ""), dl < 0 ? "Vencida" : dl === 0 ? "Vence hoy" : dl <= 3 ? "Vence en " + dl + " d" : "Vence el " + diaCorto(it.vence))); }
       else if (it.nota) tl.appendChild(el("span", null, it.nota));
       tiles.appendChild(tl);
     });
@@ -960,8 +988,9 @@
       cross.setAttribute("x1", X(d)); cross.setAttribute("x2", X(d)); cross.setAttribute("opacity", .45);
       mostrarTip(ev, "<b>Día " + d + "</b><br>Gastado " + usd(acum[d]) + (pres > 0 ? "<br>Ritmo " + usd(pres * d / N) : ""));
     }
+    hit.setAttribute("data-tip", ""); hit.style.touchAction = "pan-y";
     hit.addEventListener("pointermove", mov); hit.addEventListener("pointerdown", mov);
-    hit.addEventListener("pointerleave", function () { cross.setAttribute("opacity", 0); ocultarTip(); });
+    hit.addEventListener("pointerleave", function (ev) { if (ev.pointerType === "mouse") { cross.setAttribute("opacity", 0); ocultarTip(); } });
     box.appendChild(svg);
   }
   function pintarDias(gastos, N) {
@@ -994,19 +1023,45 @@
 
   // ---------- tooltip ----------
   var TIP = $("tip");
-  function mostrarTip(ev, html) {
+  var tipT = null, tipNodo = null;
+  function mostrarTip(ev, html, node) {
     TIP.innerHTML = html; TIP.hidden = false;
+    clearTimeout(tipT);
+    if (ev.pointerType !== "mouse" && node) {
+      // Táctil: el globo se ancla encima de lo que tocaste (no del dedo) y se va solo.
+      if (tipNodo && tipNodo !== node) tipNodo.classList.remove("tocado");
+      tipNodo = node; node.classList.add("tocado");
+      var r = node.getBoundingClientRect(), w = TIP.offsetWidth, h = TIP.offsetHeight;
+      var tx = Math.min(innerWidth - 8 - w, Math.max(8, r.left + r.width / 2 - w / 2));
+      var ty = r.top - 10 - h; if (ty < 8) ty = r.bottom + 10;
+      TIP.style.left = tx + "px"; TIP.style.top = ty + "px";
+      tipT = setTimeout(ocultarTip, 4000);
+      return;
+    }
     var x = ev.clientX + 14, y = ev.clientY - 14 - TIP.offsetHeight;
+    if (ev.pointerType !== "mouse") {  // táctil sin elemento (gráfica): encima del dedo, no debajo
+      x = Math.min(innerWidth - 8 - TIP.offsetWidth, Math.max(8, ev.clientX - TIP.offsetWidth / 2));
+      y = ev.clientY - 60 - TIP.offsetHeight; if (y < 8) y = ev.clientY + 40;
+      TIP.style.left = x + "px"; TIP.style.top = y + "px";
+      tipT = setTimeout(ocultarTip, 4000);
+      return;
+    }
     if (x + TIP.offsetWidth > innerWidth - 8) x = ev.clientX - 14 - TIP.offsetWidth;
     if (y < 8) y = ev.clientY + 18;
     TIP.style.left = Math.max(8, x) + "px"; TIP.style.top = y + "px";
   }
-  function ocultarTip() { TIP.hidden = true; }
+  function ocultarTip() { TIP.hidden = true; if (tipNodo) { tipNodo.classList.remove("tocado"); tipNodo = null; } }
   function tip(node, html) {
-    node.addEventListener("pointermove", function (ev) { mostrarTip(ev, html); });
-    node.addEventListener("pointerdown", function (ev) { mostrarTip(ev, html); });
-    node.addEventListener("pointerleave", ocultarTip);
+    node.setAttribute("data-tip", "");
+    node.addEventListener("pointermove", function (ev) { if (ev.pointerType === "mouse") mostrarTip(ev, html); });
+    node.addEventListener("pointerdown", function (ev) {
+      if (ev.pointerType !== "mouse" && tipNodo === node && !TIP.hidden) { ocultarTip(); return; }  // segundo toque: cerrar
+      mostrarTip(ev, html, node);
+    });
+    node.addEventListener("pointerleave", function (ev) { if (ev.pointerType === "mouse") ocultarTip(); });
+    node.addEventListener("contextmenu", function (ev) { ev.preventDefault(); });
   }
+  document.addEventListener("pointerdown", function (ev) { if (!TIP.hidden && !ev.target.closest("[data-tip]")) ocultarTip(); });
   document.addEventListener("scroll", ocultarTip, { passive:true });
   var rz = null;
   addEventListener("resize", function () { clearTimeout(rz); rz = setTimeout(function () { if (D) pintar(); }, 150); });
