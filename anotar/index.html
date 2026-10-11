@@ -8,38 +8,39 @@
 <meta name="apple-mobile-web-app-title" content="Diaz Finance">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#EEF2F9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0B0C0F" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F1EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C0C30" media="(prefers-color-scheme: dark)">
 <title>Diaz Finance · Anotar</title>
 <style>
   /* Una sola columna pensada para el pulgar: qué fue (dictado o texto), foto opcional, botón grande.
      Todos los campos van a 17px o más: Safari en iPhone hace zoom en cualquier campo de menos de 16px. */
+  /* Misma paleta que el panel: Luster White · Jodhpur Tan · Aster Flower Blue · Habañero (acento) · Deep Space Royal · Deadly Depths */
   :root {
-    --bg1:#E6ECF7; --bg2:#F5F6F9;
-    --glass:rgba(255,255,255,.72); --glass-edge:rgba(255,255,255,.95); --hair:rgba(17,18,20,.08);
-    --ink:#111214; --ink-2:#3C3F47; --muted:#7A7F88;
-    --lime:#DDF34A; --lime-2:#C9E236; --lime-ink:#17190B;
-    --night:#2A2B2E; --night-ink:#F3F4F6;
-    --pos:#178A4C; --crit:#D93A3F; --warn:#A86E00; --rec:#E5484D;
+    --bg1:#E7DFD5; --bg2:#F4F1EC;
+    --glass:rgba(255,255,255,.66); --glass-edge:rgba(255,255,255,.95); --hair:rgba(17,17,68,.10);
+    --ink:#111144; --ink-2:#223382; --muted:#5E648F;
+    --lime:#F98513; --lime-2:#E2740A; --lime-ink:#111144;
+    --night:#111144; --night-ink:#F4F1EC;
+    --pos:#178A4C; --crit:#D93A3F; --warn:#B35E00; --rec:#E5484D;
     --font:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
     color-scheme:light;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg1:#0B0C0F; --bg2:#14161B;
-      --glass:rgba(32,34,40,.72); --glass-edge:rgba(255,255,255,.07); --hair:rgba(255,255,255,.08);
-      --ink:#F4F5F7; --ink-2:#CDD0D6; --muted:#8C919A;
-      --night:#1A1B1E; --night-ink:#F3F4F6;
-      --pos:#4CC38A; --crit:#FF6B70; --warn:#E3A531;
+      --bg1:#1A1F63; --bg2:#0C0C30;
+      --glass:rgba(34,51,130,.32); --glass-edge:rgba(155,172,216,.16); --hair:rgba(155,172,216,.16);
+      --ink:#F4F1EC; --ink-2:#DAD1C8; --muted:#9BACD8;
+      --night:#09092A; --night-ink:#F4F1EC;
+      --pos:#4CC38A; --crit:#FF6B70; --warn:#F2C14E;
       color-scheme:dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg1:#0B0C0F; --bg2:#14161B;
-    --glass:rgba(32,34,40,.72); --glass-edge:rgba(255,255,255,.07); --hair:rgba(255,255,255,.08);
-    --ink:#F4F5F7; --ink-2:#CDD0D6; --muted:#8C919A;
-    --night:#1A1B1E; --night-ink:#F3F4F6;
-    --pos:#4CC38A; --crit:#FF6B70; --warn:#E3A531;
+    --bg1:#1A1F63; --bg2:#0C0C30;
+    --glass:rgba(34,51,130,.32); --glass-edge:rgba(155,172,216,.16); --hair:rgba(155,172,216,.16);
+    --ink:#F4F1EC; --ink-2:#DAD1C8; --muted:#9BACD8;
+    --night:#09092A; --night-ink:#F4F1EC;
+    --pos:#4CC38A; --crit:#FF6B70; --warn:#F2C14E;
     color-scheme:dark;
   }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -89,11 +90,11 @@
     min-height:62px; border:0; border-radius:20px; background:var(--lime); color:var(--lime-ink);
     font-size:19px; font-weight:700; cursor:pointer;
   }
-  .send:disabled { opacity:.45; }
+  .send:disabled { background:var(--glass); color:var(--muted); border:1px solid var(--hair); }
 
   .res { border-radius:20px; padding:14px 16px; background:var(--night); color:var(--night-ink); font-size:16px; }
   .res b { display:block; font-size:13px; letter-spacing:.04em; text-transform:uppercase; opacity:.7; margin-bottom:4px; }
-  .res.ok b { color:var(--lime); opacity:1; }
+  .res.ok b { color:var(--lime); opacity:1; }  /* naranja sobre la tarjeta oscura */
   .res.warn b { color:#F5C04A; opacity:1; }
   .res.err b { color:#FF8A8E; opacity:1; }
   .res p { margin:6px 0 0; opacity:.8; font-size:15px; }

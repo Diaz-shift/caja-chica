@@ -7,43 +7,46 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Diaz Finance">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#EEF2F9" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0B0C0F" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F1EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C0C30" media="(prefers-color-scheme: dark)">
 <title>Diaz Finance</title>
 <style>
   /* Layout: tablero de vidrio sobre fondo claro. Arriba la cápsula de meses; luego dos tarjetas (el mes / la deuda);
      abajo el panel oscuro con la lista de movimientos y su detalle en pizarra; al final las dos gráficas.
      En teléfono todo apila en una columna. */
+  /* Paleta (11 oct, pedida por Daniel): Luster White #F4F1EC · Jodhpur Tan #DAD1C8 · Aster Flower Blue #9BACD8 ·
+     Habañero #F98513 (el único acento) · Deep Space Royal #223382 · Deadly Depths #111144.
+     Las variables --lime* conservan el nombre por historia: ahora son el naranja Habañero. */
   :root {
-    --bg1:#E6ECF7; --bg2:#F5F6F9;
-    --glass:rgba(255,255,255,.66); --glass-edge:rgba(255,255,255,.95); --hair:rgba(17,18,20,.07);
-    --ink:#111214; --ink-2:#3C3F47; --muted:#878C95;
-    --lime:#DDF34A; --lime-2:#C9E236; --lime-ink:#17190B;
-    --night:#2A2B2E; --night-2:#353639; --night-ink:#F3F4F6; --night-muted:#A2A5AC;
-    --slate-1:#97A6B9; --slate-2:#8291A5; --slate-tile:rgba(255,255,255,.17); --slate-edge:rgba(255,255,255,.28);
-    --pos:#178A4C; --crit:#D93A3F; --warn:#A86E00;
+    --bg1:#E7DFD5; --bg2:#F4F1EC;
+    --glass:rgba(255,255,255,.62); --glass-edge:rgba(255,255,255,.92); --hair:rgba(17,17,68,.08);
+    --ink:#111144; --ink-2:#223382; --muted:#5E648F;
+    --lime:#F98513; --lime-2:#E2740A; --lime-ink:#111144;
+    --night:#111144; --night-2:#1D2160; --night-ink:#F4F1EC; --night-muted:#9BACD8;
+    --slate-1:#2D3F95; --slate-2:#223382; --slate-tile:rgba(244,241,236,.12); --slate-edge:rgba(244,241,236,.24);
+    --pos:#178A4C; --crit:#D93A3F; --warn:#B35E00;
     --font:-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
     --r-xl:30px; --r-lg:22px; --r-md:16px;
     color-scheme:light;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg1:#0B0C0F; --bg2:#14161B;
-      --glass:rgba(32,34,40,.66); --glass-edge:rgba(255,255,255,.07); --hair:rgba(255,255,255,.07);
-      --ink:#F4F5F7; --ink-2:#CDD0D6; --muted:#8C919A;
-      --night:#1A1B1E; --night-2:#26272B; --night-ink:#F3F4F6; --night-muted:#9A9DA4;
-      --slate-1:#465366; --slate-2:#364254; --slate-tile:rgba(255,255,255,.08); --slate-edge:rgba(255,255,255,.12);
-      --pos:#4CC38A; --crit:#FF6B70; --warn:#E3A531;
+      --bg1:#1A1F63; --bg2:#0C0C30;
+      --glass:rgba(34,51,130,.30); --glass-edge:rgba(155,172,216,.14); --hair:rgba(155,172,216,.12);
+      --ink:#F4F1EC; --ink-2:#DAD1C8; --muted:#9BACD8;
+      --night:#09092A; --night-2:#171A4E; --night-ink:#F4F1EC; --night-muted:#9BACD8;
+      --slate-1:#2D3F95; --slate-2:#1B2870; --slate-tile:rgba(244,241,236,.09); --slate-edge:rgba(244,241,236,.16);
+      --pos:#4CC38A; --crit:#FF6B70; --warn:#F2C14E;
       color-scheme:dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg1:#0B0C0F; --bg2:#14161B;
-    --glass:rgba(32,34,40,.66); --glass-edge:rgba(255,255,255,.07); --hair:rgba(255,255,255,.07);
-    --ink:#F4F5F7; --ink-2:#CDD0D6; --muted:#8C919A;
-    --night:#1A1B1E; --night-2:#26272B; --night-ink:#F3F4F6; --night-muted:#9A9DA4;
-    --slate-1:#465366; --slate-2:#364254; --slate-tile:rgba(255,255,255,.08); --slate-edge:rgba(255,255,255,.12);
-    --pos:#4CC38A; --crit:#FF6B70; --warn:#E3A531;
+    --bg1:#1A1F63; --bg2:#0C0C30;
+    --glass:rgba(34,51,130,.30); --glass-edge:rgba(155,172,216,.14); --hair:rgba(155,172,216,.12);
+    --ink:#F4F1EC; --ink-2:#DAD1C8; --muted:#9BACD8;
+    --night:#09092A; --night-2:#171A4E; --night-ink:#F4F1EC; --night-muted:#9BACD8;
+    --slate-1:#2D3F95; --slate-2:#1B2870; --slate-tile:rgba(244,241,236,.09); --slate-edge:rgba(244,241,236,.16);
+    --pos:#4CC38A; --crit:#FF6B70; --warn:#F2C14E;
     color-scheme:dark;
   }
 
@@ -212,7 +215,7 @@
   .more { margin-top:8px; background:none; border:1px solid rgba(255,255,255,.14); color:var(--night-ink); border-radius:999px; padding:8px 14px; font-size:13px; align-self:flex-start; }
 
   .detail {
-    border-radius:26px; padding:20px; color:#fff; display:flex; flex-direction:column; gap:16px;
+    border-radius:26px; padding:20px; color:#F4F1EC; display:flex; flex-direction:column; gap:16px;
     background:linear-gradient(150deg, var(--slate-1), var(--slate-2)); min-width:0; align-self:start;
   }
   .d-head { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; }
@@ -226,7 +229,7 @@
     border-radius:18px; background:var(--slate-tile); border:1px solid var(--slate-edge); padding:13px; min-height:108px;
     display:flex; flex-direction:column; justify-content:space-between; gap:10px; min-width:0;
   }
-  .d-tile .money { font-size:20px; color:#fff; }
+  .d-tile .money { font-size:20px; color:#F4F1EC; }
   .d-tile .money .cur, .d-tile .money .dec { color:rgba(255,255,255,.72); }
   .d-tile span { font-size:12px; color:rgba(255,255,255,.8); }
   .d-tile .arrow { align-self:flex-end; font-size:13px; color:rgba(255,255,255,.7); margin-top:-4px; }
@@ -238,10 +241,10 @@
     display:grid; grid-template-columns:repeat(3, minmax(0,1fr)) auto; gap:12px; align-items:center;
   }
   .d-foot .k { font-size:11.5px; color:rgba(255,255,255,.75); }
-  .d-foot .money { font-size:20px; color:#fff; }
+  .d-foot .money { font-size:20px; color:#F4F1EC; }
   .d-foot .money .cur, .d-foot .money .dec { color:rgba(255,255,255,.72); }
   .d-foot .pill.lime { padding:11px 16px; font-size:13.5px; }
-  .d-back { background:rgba(255,255,255,.18); color:#fff; border:0; border-radius:999px; padding:10px 14px; font-size:13px; }
+  .d-back { background:rgba(255,255,255,.18); color:#F4F1EC; border:0; border-radius:999px; padding:10px 14px; font-size:13px; }
   @media (max-width:560px) { .d-foot { grid-template-columns:repeat(3, minmax(0,1fr)); } .d-foot > :last-child { grid-column:1 / -1; justify-self:stretch; justify-content:center; } }
 
   /* gráficas */
@@ -330,6 +333,7 @@
   .footer button { background:none; border:0; padding:12px 8px; color:var(--ink-2); text-decoration:underline; font-size:12px; }
   @media (prefers-reduced-motion: reduce) { .row { transition:none; } }
 
+  .mark-img { width:34px; height:34px; border-radius:9px; flex:none; box-shadow:0 4px 12px rgba(17,17,68,.25); }
   /* Teléfono (11 oct): tocar no selecciona texto ni saca la lupa de iOS; sin zoom por doble toque. */
   html { -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
   .cal, .wk, .comp, .tiles, .plan, .pace-track, .list, .agenda, .seg-ctl, .months, .night, svg {
@@ -375,7 +379,7 @@
 
   <main id="app" class="wrap" hidden>
     <header class="bar">
-      <div class="brand"><span class="mark" aria-hidden="true">$</span>Diaz Finance</div>
+      <div class="brand"><img class="mark-img" src="apple-touch-icon.png" alt="" width="34" height="34">Diaz Finance</div>
       <nav class="capsule" id="months" aria-label="Mes"></nav>
       <div class="bar-right"><span class="pill line" id="stamp"></span></div>
     </header>
@@ -628,7 +632,7 @@
       var f = $("paceFill"); f.style.width = Math.min(100, gastado / pres * 100) + "%"; f.className = gastado > pres ? "crit" : "";
       $("paceMark").style.left = "calc(" + (dia / N * 100) + "% - 1px)"; $("paceMark").hidden = !esActual;
       $("paceL").textContent = Math.round(gastado / pres * 100) + "% del tope (" + usd(pres, 0) + ")";
-      $("paceR").textContent = esActual ? "Marca lima = hoy (" + dia + "/" + N + ")" : "Mes cerrado";
+      $("paceR").textContent = esActual ? "Marca naranja = hoy (" + dia + "/" + N + ")" : "Mes cerrado";
     }
 
     pintarDeuda();
