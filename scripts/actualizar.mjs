@@ -57,6 +57,8 @@ if (i > 0) {
 } else {
   fs.mkdirSync("sitio", { recursive: true });
   fs.copyFileSync("index.html", "sitio/index.html");
+  fs.mkdirSync("sitio/anotar", { recursive: true });
+  fs.copyFileSync("anotar/index.html", "sitio/anotar/index.html");
   const d = await datosDelSheet();
   if (d) {
     fs.writeFileSync("sitio/data.enc.json", JSON.stringify(cifrar(conDeudas(d))));

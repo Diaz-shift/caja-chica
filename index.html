@@ -229,6 +229,8 @@
   .d-tile .money .cur, .d-tile .money .dec { color:rgba(255,255,255,.72); }
   .d-tile span { font-size:12px; color:rgba(255,255,255,.8); }
   .d-tile .arrow { align-self:flex-end; font-size:13px; color:rgba(255,255,255,.7); margin-top:-4px; }
+  a.d-tile.wide { grid-column:1 / -1; min-height:0; flex-direction:row; align-items:center; text-decoration:none; }
+  a.d-tile.wide .arrow { order:2; margin:0 0 0 auto; align-self:center; }
   .d-tile.ghost { background:repeating-linear-gradient(-45deg, rgba(255,255,255,.07) 0 6px, transparent 6px 12px); align-items:center; justify-content:center; text-align:center; }
   .d-foot {
     border-radius:20px; background:var(--slate-tile); border:1px solid var(--slate-edge); padding:14px 16px;
@@ -808,7 +810,8 @@
       r.appendChild(el("span", "av" + (m.tipo === "Ingreso" ? " ing" : ""), iniciales(m)));
       var c = el("span"); c.style.minWidth = "0";
       c.appendChild(el("div", "t", m.nota || m.cat || m.tipo));
-      c.appendChild(el("div", "s", diaCorto(m.fecha) + " · " + (m.tipo === "Gasto" ? m.cat : m.tipo === "Ingreso" ? m.cat : m.tipo)));
+      c.appendChild(el("div", "s", diaCorto(m.fecha) + " · " + (m.tipo === "Gasto" ? m.cat : m.tipo === "Ingreso" ? m.cat : m.tipo) +
+        (m.estado === "Revisar" ? " · por revisar" : "") + (m.foto ? " · 📎" : "")));
       r.appendChild(c);
       var a = el("span", "a" + (m.tipo === "Ingreso" ? " pos" : ""));
       if (m.tipo === "Gasto") { a.textContent = "−" + usd(m.usd || 0); if (m.moneda === "Bs") a.appendChild(el("small", null, bs(m.monto))); }
@@ -850,7 +853,7 @@
     f.appendChild(action);
     return f;
   }
-  function anotarBtn() { var a = el("a", "pill lime", "Anotar"); a.href = "https://forms.gle/sL4xGGC8uNVGwWDa7"; a.target = "_blank"; a.rel = "noopener"; return a; }
+  function anotarBtn() { var a = el("a", "pill lime", "Anotar"); a.href = "anotar/"; return a; }
 
   function pintarDetalle(movs, gastado, pres, por) {
     var d = $("detail"); d.textContent = "";
@@ -877,8 +880,14 @@
     if (m.tipo === "Gasto") tl2.appendChild(dTile(por[m.cat] || 0, "Todo " + m.cat + " en el mes"));
     else if (m.bs) tl2.appendChild(dTile(bs(m.bs), m.tipo === "Compra" ? "Bs que pagaste" : "Bs que recibiste"));
     else tl2.appendChild(dTile(m.estado || "—", "Estado"));
-    var nt = el("div", "d-tile"); nt.appendChild(el("span", "arrow", "✎")); nt.appendChild(el("span", null, m.nota || "Sin nota")); nt.appendChild(el("span", null, "Nota"));
+    var nt = el("div", "d-tile"); nt.appendChild(el("span", "arrow", "✎")); nt.appendChild(el("span", null, m.nota || "Sin nota"));
+    nt.appendChild(el("span", null, m.estado === "Revisar" ? "Nota · por revisar" : "Nota"));
     tl2.appendChild(nt);
+    if (m.foto) {
+      var ft = el("a", "d-tile wide"); ft.href = m.foto; ft.target = "_blank"; ft.rel = "noopener";
+      ft.appendChild(el("span", "arrow", "↗")); ft.appendChild(el("span", null, "📎 Ver el comprobante (foto en Drive)"));
+      tl2.appendChild(ft);
+    }
     d.appendChild(tl2);
     var back = el("button", "d-back", "Volver al resumen"); back.type = "button"; back.onclick = function () { SEL = null; pintar(); };
     d.appendChild(dFoot([["Gastado en el mes", gastado], ["Presupuesto", pres], ["Queda", pres - gastado]], back));
