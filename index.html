@@ -437,7 +437,7 @@
   "use strict";
   var MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
   var KEY_STORE = "caja-chica-llave";
-  var D = null, MES = null, FILTRO = "Gasto", SEL = null, verTodos = false, SOBRE = null;
+  var D = null, MES = null, FILTRO = "Gasto", SEL = null, verTodos = false, SOBRE = null, LLAVE = null;
   var FILTROS = [["Gasto","Gastos"],["Ingreso","Ingresos"],["dinero","Cambios y de paso"],["todos","Todo"]];
 
   // ---------- formato ----------
@@ -494,16 +494,31 @@
       if (!r.ok) throw new Error("sin datos"); return r.json();
     }).then(function (env) {
       SOBRE = env;
-      return llaveGuardada(env).then(function (key) { return key ? abrirCon(key, env).catch(function () { return null; }) : null; });
+      return llaveGuardada(env).then(function (key) { LLAVE = key; return key ? abrirCon(key, env).catch(function () { return null; }) : null; });
     }).then(function (data) { if (data) mostrar(data); })
       .catch(function () { $("lockErr").textContent = "No pude cargar los datos. Revisa tu conexión y recarga."; });
   }
+  // Si los datos cambiaron (un registro nuevo dispara la publicación), repintar sin pedir la clave otra vez.
+  function refrescar() {
+    if (!LLAVE || !D || document.hidden) return;
+    fetch("data.enc.json?t=" + Date.now(), { cache:"no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (env) {
+      if (!env || !SOBRE || env.ct === SOBRE.ct || env.salt !== SOBRE.salt) return;
+      return abrirCon(LLAVE, env).then(function (data) {
+        SOBRE = env; D = data;
+        $("stamp").textContent = ""; mostrarSinMover(data);
+      });
+    }).catch(function () {});
+  }
+  function mostrarSinMover(data) { var mes = MES, sel = SEL; mostrar(data); MES = mes; SEL = null; if (sel) D.movimientos.forEach(function (m) { if (m.i === sel.i) SEL = m; }); pintar(); }
+  document.addEventListener("visibilitychange", refrescar);
+  setInterval(refrescar, 45000);
+
   $("lockForm").addEventListener("submit", function (ev) {
     ev.preventDefault();
     if (!SOBRE) { $("lockErr").textContent = "Todavía cargando. Intenta en un segundo."; return; }
     var btn = $("abrir"); btn.disabled = true; btn.textContent = "Abriendo…"; $("lockErr").textContent = "";
     var key;
-    derivar($("clave").value, SOBRE).then(function (k) { key = k; return abrirCon(k, SOBRE); }).then(function (data) {
+    derivar($("clave").value, SOBRE).then(function (k) { key = k; LLAVE = k; return abrirCon(k, SOBRE); }).then(function (data) {
       if ($("recordar").checked) guardarLlave(key, SOBRE);
       mostrar(data);
     }).catch(function () { $("lockErr").textContent = "Clave incorrecta. Revisa mayúsculas, tildes y guiones."; })
@@ -517,7 +532,8 @@
     $("lock").hidden = true; $("app").hidden = false;
     var ms = meses(), hoyM = hoyCaracas().slice(0, 7);
     MES = ms.indexOf(hoyM) >= 0 ? hoyM : ms[ms.length - 1];
-    $("stamp").textContent = "Actualizado " + new Intl.DateTimeFormat("es-VE", { timeZone:"America/Caracas", day:"numeric", month:"short", hour:"numeric", minute:"2-digit" }).format(new Date(D.generado));
+    $("stamp").textContent = "Actualizado " + new Intl.DateTimeFormat("es-VE", { timeZone:"America/Caracas", day:"numeric", month:"short", hour:"numeric", minute:"2-digit" }).format(new Date(D.generado)) +
+      (D.tasa ? " · " + (D.tasaModo && D.tasaModo !== "Mía" ? D.tasaModo + " " : "tasa ") + grp(D.tasa, 2) : "");
     pintar();
   }
   function meses() {
@@ -876,7 +892,7 @@
     var tl2 = el("div", "d-tiles");
     tl2.appendChild(dTile(m.moneda === "Bs" ? bs(m.monto) : grp(m.monto, 2) + " " + (m.moneda === "USD" ? "$" : m.moneda), "Monto original"));
     var tasa = m.bs && m.monto ? m.bs / m.monto : (m.moneda === "Bs" && m.usd ? m.monto / m.usd : 0);
-    tl2.appendChild(dTile(tasa ? grp(tasa, 2) : "—", "Tasa", m.tipo === "Compra" || m.tipo === "Cambio" ? "la tuya, real" : tasa ? "vigente ese día" : ""));
+    tl2.appendChild(dTile(tasa ? grp(tasa, 2) : "—", "Tasa", m.tipo === "Compra" || m.tipo === "Cambio" ? "la tuya, real" : tasa ? (D.tasaModo && D.tasaModo !== "Mía" ? D.tasaModo + " de ese día" : "vigente ese día") : ""));
     if (m.tipo === "Gasto") tl2.appendChild(dTile(por[m.cat] || 0, "Todo " + m.cat + " en el mes"));
     else if (m.bs) tl2.appendChild(dTile(bs(m.bs), m.tipo === "Compra" ? "Bs que pagaste" : "Bs que recibiste"));
     else tl2.appendChild(dTile(m.estado || "—", "Estado"));
