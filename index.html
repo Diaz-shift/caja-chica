@@ -892,7 +892,7 @@
     var tl2 = el("div", "d-tiles");
     tl2.appendChild(dTile(m.moneda === "Bs" ? bs(m.monto) : grp(m.monto, 2) + " " + (m.moneda === "USD" ? "$" : m.moneda), "Monto original"));
     var tasa = m.bs && m.monto ? m.bs / m.monto : (m.moneda === "Bs" && m.usd ? m.monto / m.usd : 0);
-    tl2.appendChild(dTile(tasa ? grp(tasa, 2) : "—", "Tasa", m.tipo === "Compra" || m.tipo === "Cambio" ? "la tuya, real" : tasa ? (D.tasaModo && D.tasaModo !== "Mía" ? D.tasaModo + " de ese día" : "vigente ese día") : ""));
+    tl2.appendChild(dTile(tasa ? grp(tasa, 2) : "—", "Tasa", m.tipo === "Compra" || m.tipo === "Cambio" ? "la tuya, real" : tasa ? (D.tasaModo === "BCV" && m.tipo === "Ingreso" && /^Rollo B/.test(m.cat) ? "BCV promedio $ y € de ese día" : D.tasaModo && D.tasaModo !== "Mía" ? D.tasaModo + " de ese día" : "vigente ese día") : ""));
     if (m.tipo === "Gasto") tl2.appendChild(dTile(por[m.cat] || 0, "Todo " + m.cat + " en el mes"));
     else if (m.bs) tl2.appendChild(dTile(bs(m.bs), m.tipo === "Compra" ? "Bs que pagaste" : "Bs que recibiste"));
     else tl2.appendChild(dTile(m.estado || "—", "Estado"));
